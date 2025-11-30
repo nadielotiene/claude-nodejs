@@ -1,0 +1,11 @@
+{
+  "name": "claude-nodejs",
+  "version": "1.0.0",
+  "main": "01-hello-node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kenneth Velazquez",
+  "license": "ISC",
+  "description": ""
+}
