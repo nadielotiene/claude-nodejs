@@ -1,0 +1,3 @@
+Name: Kenny
+Lucky Number: 7
+Double Lucky Number: 14
