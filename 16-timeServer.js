@@ -1,6 +1,20 @@
 const http = require('http');
+const fs = require('fs').promises;
 
-const server = http.createServer((request, response) => {
+const server = http.createServer(async (request, response) => {
+
+    if (request.url === '/16-styles.css') {
+        try {
+            const css = await fs.readFile('16-styles.css', 'utf8');
+            response.writeHead(200, {'Content-Type': 'text/css; charset=utf-8'});
+            response.end(css);
+            return;
+        } catch (error) {
+            response.writeHead(404, {'Content-Type': 'text/plain'});
+            response.end('CSS file not found');
+            return;
+        }
+    } 
 
     response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
 
@@ -71,84 +85,18 @@ const server = http.createServer((request, response) => {
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <!-- <meta http-equiv="refresh" content="1"> -->
+            <link rel="stylesheet" href="/16-styles.css">
             <title>Cronus</title>
-            <style>
-                html {
-                    height: 100%;
-                }
-
-                body {
-                font-family: Arial, sans-serif;
-                max-width: 600px;
-                margin: 50px auto;
-                padding: 20px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                }
-                h1, h2, h3, footer { 
-                    color: pink; 
-                }
-                h2 {
-                    font-size: 1rem;
-                }
-                ul {
-                    list-style: none;
-                    padding: 0;
-                }
-                p {
-                    color: #333;
-                    margin: 10px 0;
-                    padding: 10px;
-                    background: white;
-                    border-radius: 5px;
-                }
-                p:hover {
-                    background: #e0e0e0;
-                }
-                hr {
-                    border: none;
-                    border-top: 2px solid #777;
-                    border-radius: 5px;
-                }
-
-                .contdown-display {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 10px;
-                    font-size: 2rem
-                    
-                }
-                .countdown-number {
-                    background: rgba(255, 255, 255, 0.2);
-                    padding: 10px 20px;
-                    border-radius: 10px;
-                    font-weight: bold;
-                    fonc-size: 2.5rem;
-                    color: #ffd93d;
-                }
-                .countdown-label {
-                    color: #e0e0e0;
-                    font-size: 1rem;
-                    opacity: 0.8;
-                    margin-right: 15px;
-                }
-
-                footer {
-                    text-align: center; 
-                    margin-top: 30px;
-                }
-            </style>
         </head>
         <body>
             <h1>Cronus</h1>
             <h2>${greeting}</h2>
-            <p class="date">🕰️ ${fullDate}, ${time}</p>
+            <p class="date">🕰️ ${fullDate}</p>
+            <p class="date">📍 Current Location: ${time}</p>
             <p class="date">🌉 San Francisco: ${sanFrancisco}</p>
             <p class="date">🗼 Tokyo: ${tokyo}</p>
             <p class="date">⚔️ Rome: ${rome}</p>
-            <hr>
-            <p>${paddedHours}:${paddedMinutes}:${paddedSeconds}</p>
-            
+            <hr>            
             <div class="countdown">
                 <h3>⏳ Countdown to Midnight:</h3>
                 <div class="countdown-display">
@@ -161,7 +109,6 @@ const server = http.createServer((request, response) => {
                 </div>
             </div>
 
-            <hr>
             <footer>
                 Made with ❤️ by Kenny
             </footer>
