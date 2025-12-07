@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 
 const server = http.createServer(async (request, response) => {
 
+    // Handle CSS files
     if (request.url === '/16-styles.css') {
         try {
             const css = await fs.readFile('16-styles.css', 'utf8');
@@ -16,8 +17,10 @@ const server = http.createServer(async (request, response) => {
         }
     } 
 
+    // Set HTML headers
     response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
 
+    // Date data
     const now = new Date();
     const month = now.toLocaleString('en', {month: 'long'});
     const weekday = now.toLocaleDateString('en', {weekday:'long'});
@@ -27,6 +30,7 @@ const server = http.createServer(async (request, response) => {
     const fullDate = `Today is ${weekday}, ${month} ${day}, ${year}`
     
 
+    // Greeting data
     let greeting = '';
     const greetingHour = now.getHours();
     
@@ -39,6 +43,7 @@ const server = http.createServer(async (request, response) => {
     }
 
 
+    // World Clocks
     const sanFrancisco = now.toLocaleString('en-US', {
         timeZone: 'America/Los_Angeles',
         hour: '2-digit',
@@ -63,7 +68,7 @@ const server = http.createServer(async (request, response) => {
         hourCycle:'h12',
     });
 
-
+    // Countdown
     const midnight = new Date();
     midnight.setDate(midnight.getDate() + 1);
     midnight.setHours(0, 0, 0, 0);
@@ -78,6 +83,7 @@ const server = http.createServer(async (request, response) => {
     const paddedSeconds = String(secondsUntilMidnight).padStart(2, '0');
 
 
+    // HTML
     const html = `
         <!DOCTYPE html>
         <html lang="en">
@@ -121,4 +127,4 @@ const server = http.createServer(async (request, response) => {
 
 server.listen(3000, () => {
     console.log('🚀 Server running at http://localhost:3000/');
-})
+});

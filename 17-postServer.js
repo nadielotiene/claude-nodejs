@@ -5,6 +5,7 @@ const server = http.createServer(async (request, response) => {
     const method = request.method;
     const url = request.url;
 
+    //  Handle CSS files
     if (request.url === '/17-style.css') {
         try {
             const css = await fs.readFile('17-style.css', 'utf8');

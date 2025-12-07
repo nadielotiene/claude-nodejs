@@ -1,0 +1,23 @@
+else if (url === '/your-route' && method === 'POST') {
+    let body = '';
+    
+    // Step 1: Collect chunks
+    request.on('data', (chunk) => {
+        body += chunk.toString();
+    });
+    
+    // Step 2: Process when done
+    request.on('end', () => {
+        // Parse the data
+        const params = new URLSearchParams(body);
+        const value = params.get('fieldName');
+        
+        // Do something with the data
+        // ...
+        
+        // Send response
+        response.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+        const html = `...`;
+        response.end(html);
+    });
+}
