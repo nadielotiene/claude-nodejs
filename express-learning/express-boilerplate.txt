@@ -1,0 +1,15 @@
+// Import Express
+const express = require('express') ;
+
+// Create an Express app
+const app = express();
+
+// Define a route
+app.get('/', (req, res) => {
+    res.send('<h1>🎉 Hello from Express!</h1>');
+});
+
+// Start the server
+app.listen(3000, () => {
+    console.log('🚀 Express server running at http://localhost:3000/');
+});
