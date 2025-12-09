@@ -4,9 +4,21 @@ const express = require('express') ;
 // Create an Express app
 const app = express();
 
-// Define a route
+// Serve Static Flies
+app.use(express.statuc('public'));
+
+// Parse from data
+app.use(express.urlencoded({ extended: true }));
+
+// Define a route GET Request
 app.get('/', (req, res) => {
     res.send('<h1>🎉 Hello from Express!</h1>');
+});
+
+// POST Request
+app.post('/submit', (req, res) => {
+    const name = req.body.name;
+    res.send()
 });
 
 // Start the server
