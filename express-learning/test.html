@@ -1,0 +1,99 @@
+<body>
+            <h1>👥 User API Tester</h1>
+            
+            <div class="section">
+                <h2>📖 Get All Users</h2>
+                <button onclick="getAllUsers()">Get All Users</button>
+            </div>
+            
+            <div class="section">
+                <h2>🔍 Get One User</h2>
+                <input type="number" id="getUserId" placeholder="User ID">
+                <button onclick="getOneUser()">Get User</button>
+            </div>
+            
+            <div class="section">
+                <h2>➕ Create User</h2>
+                <input type="text" id="createName" placeholder="Name">
+                <input type="number" id="createAge" placeholder="Age">
+                <input type="text" id="createCity" placeholder="City">
+                <button onclick="createUser()">Create User</button>
+            </div>
+            
+            <div class="section">
+                <h2>✏️ Update User</h2>
+                <input type="number" id="updateId" placeholder="User ID">
+                <input type="text" id="updateName" placeholder="New Name">
+                <input type="number" id="updateAge" placeholder="New Age">
+                <input type="text" id="updateCity" placeholder="New City">
+                <button onclick="updateUser()">Update User</button>
+            </div>
+            
+            <div class="section">
+                <h2>🗑️ Delete User</h2>
+                <input type="number" id="deleteId" placeholder="User ID">
+                <button onclick="deleteUser()">Delete User</button>
+            </div>
+            
+            <div id="result"></div>
+            
+            <script>
+                async function getAllUsers() {
+                    const response = await fetch('/api/users');
+                    const data = await response.json();
+                    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                }
+                
+                async function getOneUser() {
+                    const id = document.getElementById('getUserId').value;
+                    const response = await fetch('/api/users/' + id);
+                    const data = await response.json();
+                    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                }
+                
+                async function createUser() {
+                    const name = document.getElementById('createName').value;
+                    const age = document.getElementById('createAge').value;
+                    const city = document.getElementById('createCity').value;
+                    
+                    const response = await fetch('/api/users', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, age: parseInt(age), city })
+                    });
+                    
+                    const data = await response.json();
+                    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                    getAllUsers();
+                }
+                
+                async function updateUser() {
+                    const id = document.getElementById('updateId').value;
+                    const name = document.getElementById('updateName').value;
+                    const age = document.getElementById('updateAge').value;
+                    const city = document.getElementById('updateCity').value;
+                    
+                    const response = await fetch('/api/users/' + id, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, age: parseInt(age), city })
+                    });
+                    
+                    const data = await response.json();
+                    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                    getAllUsers();
+                }
+                
+                async function deleteUser() {
+                    const id = document.getElementById('deleteId').value;
+                    
+                    const response = await fetch('/api/users/' + id, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                    getAllUsers();
+                }
+            </script>
+        </body>
