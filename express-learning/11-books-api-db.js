@@ -91,7 +91,7 @@ app.post('/api/books', (req, res) => {
     }
 
     const insert = db.prepare(`
-           INSERT INTO books (title, author year, read)
+           INSERT INTO books (title, author, year, read)
            VALUES (?, ?, ?, ?) 
     `);
 
@@ -100,7 +100,7 @@ app.post('/api/books', (req, res) => {
     const newBook = db.prepare('SELECT * FROM books WHERE id = ?').get(result.lastInsertRowid);
 
     res.status(201).json({
-        meesage: "Boo created successfully",
+        message: "Book created successfully",
         book: newBook
     });
 });
@@ -136,7 +136,7 @@ app.put('/api/books/:id', (req, res) => {
     const updatedBook = db.prepare('SELECT * FROM books WHERE id = ?').get(id);
 
     res.json({
-        message: "Book update successfully",
+        message: "Book updated successfully",
         book: updatedBook
     });
 });
@@ -144,6 +144,8 @@ app.put('/api/books/:id', (req, res) => {
 // TOGGLE read status
 app.patch('/api/books/:id/toggle', (req, res) => {
     const id = parseInt(req.params.id);
+
+    // ⚠️ WARNING: If you forget WHERE, it updates EVERY row!
     const book = db.prepare('SELECT * FROM books WHERE id = ?').get(id);
 
     if (!book) {
@@ -167,6 +169,8 @@ app.patch('/api/books/:id/toggle', (req, res) => {
 // DELETE a book
 app.delete('/api/books/:id', (req, res) => {
     const id = parseInt(req.params.id);
+
+    // ⚠️ WARNING: If you forget WHERE, it deletes EVERYTHING!
     const book = db.prepare('SELECT * FROM books WHERE id = ?').get(id);
 
     if (!book) {

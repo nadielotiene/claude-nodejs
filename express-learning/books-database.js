@@ -6,7 +6,7 @@ const db = new Database('books.db');
 // Create books table if it doesn't exist
 db.exec(`
     CREATE TABLE IF NOT EXISTS books (
-        id INTERGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         author TEXT NOT NULL,
         year INTEGER NOT NULL,
