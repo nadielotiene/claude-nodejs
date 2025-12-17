@@ -91,8 +91,8 @@ app.post('/api/books', (req, res) => {
     }
 
     const insert = db.prepare(`
-           INSERT INTO books (title, author, year, read)
-           VALUES (?, ?, ?, ?) 
+        INSERT INTO books (title, author, year, read)
+        VALUES (?, ?, ?, ?) 
     `);
 
     const result = insert.run(title, author, year, read ? 1 : 0);
