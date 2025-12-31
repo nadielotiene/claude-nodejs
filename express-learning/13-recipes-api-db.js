@@ -1,23 +1,28 @@
+require('dotenv').config();
 const express = require('express');
 const db = require('./recipes-database');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const count = db.prepare('SELECT COUNT(*) as count FROM recipes').get();
 if (count.count === 0) {
     const insert = db.prepare(`
         INSERT INTO recipes (title, ingredients, instructions, prep_time, 
-            cook_time, servings, difficulty, favorite, created_at, user_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+            cook_time, servings, difficulty, favorite, created_at, user_id, category_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
     `);
 
     insert.run('Rice', 'water, rice, oil, salt', 'add ingredients, cook', 
-        4, 20, 4, 'easy', 1, new Date().toISOString(), 1);
+        4, 20, 4, 'easy', 1, new Date().toISOString(), 1, 3);
     insert.run('Beans', 'water, beans, oil, salt, seasoning', 'add ingredients, cook', 
-        7, 30, 6, 'medium', 0, new Date().toISOString(), 2);
+        7, 30, 6, 'medium', 0, new Date().toISOString(), 2, 3);
     insert.run('Pork Chops', 'Pork Chop, seasoning, oil', 'add ingredients, cook', 
-        2, 10, 2, 'hard', 0, new Date().toISOString(), 1);
+        2, 10, 2, 'hard', 0, new Date().toISOString(), 1, 3);
 
     console.log('🍚 New recipe added!');
 }
@@ -26,9 +31,11 @@ app.get('/api/recipes', (req, res) => {
     const filter = req.query.filter;
 
     let query = `
-        SELECT recipes.*, users.username AS author 
+        SELECT recipes.*, users.username AS author,
+            categories.name AS category_name
         FROM recipes 
         JOIN users ON recipes.user_id = users.id
+        JOIN categories ON recipes.category_id = categories.id
     `;
     
     if (filter === 'easy') {
@@ -63,9 +70,14 @@ app.get('/api/recipes/search', (req, res) => {
 
     const searchPattern = `%${query}%`;
     const results = db.prepare(`
-        SELECT * FROM recipes
-        WHERE title LIKE ? OR ingredients LIKE ?
-    `).all(searchPattern, searchPattern);
+        SELECT recipes.*, users.username as author,
+            categories.name AS category_name
+        FROM recipes
+        JOIN users ON recipes.user_id = users.id
+        JOIN categories ON recipes.category_id = categories.id 
+        WHERE title LIKE ? OR ingredients LIKE ? 
+            OR users.username LIKE ? OR categories.name LIKE ?
+    `).all(searchPattern, searchPattern, searchPattern, searchPattern);
 
     res.json({
         query: query,
@@ -76,7 +88,13 @@ app.get('/api/recipes/search', (req, res) => {
 
 app.get('/api/recipes/:id', (req, res) => {
     const id = parseInt(req.params.id);
-    const recipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(id);
+    const recipe = db.prepare(`       
+        SELECT recipes.*, users.username AS author,
+            categories.name AS category_name
+        FROM recipes 
+        JOIN users ON recipes.user_id = users.id
+        JOIN categories ON recipes.category_id = categories.id 
+        WHERE recipes.id = ?`).get(id);
 
     if (!recipe) {
         return res.status(404).json({
@@ -90,33 +108,180 @@ app.get('/api/recipes/:id', (req, res) => {
 
 app.post('/api/recipes', (req, res) => {
     const { title, ingredients, instructions, prep_time, cook_time, 
-        servings, difficulty, favorite } = req.body;
+        servings, difficulty, favorite, user_id, category_id } = req.body;
 
-    if (!title || !ingredients || !instructions || !prep_time || 
-        !cook_time || !servings || !difficulty || !favorite) {
+    if (!title || !ingredients || !instructions || !prep_time || !cook_time ||
+        !servings || !difficulty || favorite === undefined || !user_id || !category_id) {
         return res.status(400).json({
             error: "Missing required fields",
             required: ["title", "ingredients", "instructions", "prep_time", 
-                "cook_time", "servings", "difficulty", "favorite"]
+                "cook_time", "servings", "difficulty", "favorite", "user_id", "category_id"]
+        });
+    }
+
+    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
+    if (!user) {
+        return res.status(400).json({
+            error: "User not found",
+            hint: "Available users: 1 (john_chef), 2 (maria_cook), 3 (alex_baker)"
+        });
+    }
+
+    const category = db.prepare('SELECT id FROM categories WHERE id = ?').get(category_id);
+    if (!category) {
+        return res.status(400).json({
+            error: "Category not found",
+            hint: "Available categories: 1 (Breakfast), 2 (Lunch), 3 (Dinner), 4 (Dessert), 5 (Snacks)"
         });
     }
 
     const insert = db.prepare(`
         INSERT INTO recipes (title, ingredients, instructions, prep_time, 
-        cook_time, servings, difficulty, favorite, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
+        cook_time, servings, difficulty, favorite, user_id, category_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
     `);
 
-    const result = insert.run(title, ingredients, instructions, prep_time, 
-        cook_time, servings, difficulty, favorite ? 1 : 0, new Date().toISOString());
+    const result = insert.run(title, ingredients, instructions, prep_time, cook_time, 
+        servings, difficulty, favorite ? 1 : 0, user_id, category_id, new Date().toISOString());
 
-    const newRecipe = db.prepare
-        ('SELECT * FROM recipes WHERE id = ?').get(result.lastInsertRowid);
+    const newRecipe = db.prepare(`
+        SELECT recipes.*, users.username as author,
+            categories.name AS category_name
+        FROM recipes 
+        JOIN users ON recipes.user_id = users.id 
+        JOIN categories ON recipes.category_id = categories.id 
+        WHERE recipes.id = ?
+    `).get(result.lastInsertRowid);
 
     res.status(201).json({
         message: "Recipe created successfully",
         recipe: newRecipe
     });
+});
+
+app.post('/api/auth/signup', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+
+        if (!username || !email || !password) {
+            return res.status(400).json({
+                error: "Missing required fields",
+                required: ["username", "email", "password"]
+            });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({
+                error: "Password must be at least 6 characters"
+            });
+        }
+
+        const existingUsername = db.prepare(`
+            SELECT id FROM users WHERE username = ?`).get(username);
+        if (existingUsername) {
+            return res.status(400).json({
+                error: "Username already taken"
+            });
+        }
+
+        const existingEmail = db.prepare(`
+            SELECT id FROM users WHERE email = ?`).get(email);
+        if (existingEmail) {
+            return res.status(400).json({
+                error: "Email already registered"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const insert = db.prepare(`
+            INSERT INTO users (username, email, password, created_at)
+            VALUES (?, ?, ?, ?)
+        `);
+
+        const result = insert.run(username, email, hashedPassword, 
+            new Date().toISOString());
+
+        const newUser = db.prepare(`
+            SELECT id, username, email, created_at
+            FROM users 
+            WHERE id = ?
+        `).get(result.lastInsertRowid);
+
+        const token = jwt.sign(
+            // PAYLOAD - data to store in token
+            {
+                userId: newUser.id,
+                usename: newUser.username
+            },
+            // SECRET - your secret key from .env
+            JWT_SECRET,
+            // OPTIONS - when should token expire
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({
+            message: "User created successfully",
+            recipe: newUser,
+            token: token
+        });
+    } catch (error) {
+        console.log('Signup error:', error);
+        res.status(500).json({ error: "Server error during signup" });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                error: "Missing required fields",
+                required: ["email", "password"]
+            });
+        }
+
+        const user = db.prepare(`
+            SELECT * FROM users WHERE email = ?`).get(email);
+
+        if (!user) {
+            return res.status(401).json({
+                error: "Invalid email or password"
+            });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({
+                error: "Invalid email or password"
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                userId: user.id,
+                usernamne: user.username
+            },
+            JWT_SECRET,
+            {expiresIn: '7d'}
+        );
+
+        res.json({
+            message: "Login successful",
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                created_at: user.created_at
+            },
+            token: token
+        })
+
+    } catch(error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: "Server error during login" });
+    }
 });
 
 app.put('/api/recipes/:id', (req, res) => {
