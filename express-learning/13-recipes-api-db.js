@@ -8,6 +8,32 @@ const app = express();
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET;
+console.log('JWT_SECRET:', JWT_SECRET ? 'Loaded ✅' : 'NOT LOADED ❌');
+
+function authenticateToken(req, res, next) {
+    // Get token from Authorization header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer TOKEN"
+
+    if (!token) {
+        return res.status(401).json({
+            error: "Access denied. No token provided."
+        });
+    }
+
+    try {
+        // Verify token and extract user info
+        const decoded = jwt.verify(token, JWT_SECRET);
+        // Attach user info to request object
+        req.user = decoded;
+        // Continue to the next middleware/route
+        next();
+    } catch (error) {
+        return res.status(403).json({
+            error: "Invalid or expired token"
+        });
+    }
+}
 
 const count = db.prepare('SELECT COUNT(*) as count FROM recipes').get();
 if (count.count === 0) {
@@ -106,26 +132,27 @@ app.get('/api/recipes/:id', (req, res) => {
     res.json(recipe);
 });
 
-app.post('/api/recipes', (req, res) => {
+app.post('/api/recipes', authenticateToken, (req, res) => {
     const { title, ingredients, instructions, prep_time, cook_time, 
-        servings, difficulty, favorite, user_id, category_id } = req.body;
+        servings, difficulty, favorite, category_id } = req.body; // remove 'user_id' when using tokens
 
     if (!title || !ingredients || !instructions || !prep_time || !cook_time ||
-        !servings || !difficulty || favorite === undefined || !user_id || !category_id) {
+        !servings || !difficulty || favorite === undefined || !category_id) {
         return res.status(400).json({
             error: "Missing required fields",
             required: ["title", "ingredients", "instructions", "prep_time", 
-                "cook_time", "servings", "difficulty", "favorite", "user_id", "category_id"]
+                "cook_time", "servings", "difficulty", "favorite", "category_id"] // remove 'user_id' when using tokens
         });
     }
 
-    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
-    if (!user) {
-        return res.status(400).json({
-            error: "User not found",
-            hint: "Available users: 1 (john_chef), 2 (maria_cook), 3 (alex_baker)"
-        });
-    }
+    // You don't need it anymore because the middleware already verified the user exists (they're logged in!)
+    // const user = db.prepare('SELECT id FROM users WHERE id = ?').get(user_id);
+    // if (!user) {
+    //     return res.status(400).json({
+    //         error: "User not found",
+    //         hint: "Available users: 1 (john_chef), 2 (maria_cook), 3 (alex_baker)"
+    //     });
+    // }
 
     const category = db.prepare('SELECT id FROM categories WHERE id = ?').get(category_id);
     if (!category) {
@@ -142,7 +169,7 @@ app.post('/api/recipes', (req, res) => {
     `);
 
     const result = insert.run(title, ingredients, instructions, prep_time, cook_time, 
-        servings, difficulty, favorite ? 1 : 0, user_id, category_id, new Date().toISOString());
+        servings, difficulty, favorite ? 1 : 0, req.user.userId, category_id, new Date().toISOString());
 
     const newRecipe = db.prepare(`
         SELECT recipes.*, users.username as author,
