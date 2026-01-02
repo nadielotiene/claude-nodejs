@@ -311,10 +311,10 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-app.put('/api/recipes/:id', (req, res) => {
+app.put('/api/recipes/:id', authenticateToken, (req, res) => {
     const id = parseInt(req.params.id);
     const { title, ingredients, instructions, prep_time, 
-        cook_time, servings, difficulty, favorite } = req.body;
+        cook_time, servings, difficulty, favorite, category_id } = req.body;
 
     const recipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(id);
 
@@ -325,10 +325,18 @@ app.put('/api/recipes/:id', (req, res) => {
         });
     }
 
+    if (recipe.user_id !== req.user.userId) {
+        return res.status(403).json({
+            error: "Forbidden: You can only update your own recipes",
+            recipe_owner: recipe.user_id,
+            your_user_id: req.user.userId
+        });
+    }
+
     const update = db.prepare(`
         UPDATE recipes
         SET title = ?, ingredients = ?, instructions = ?, prep_time = ?, 
-            cook_time = ?, servings = ?, difficulty = ?, favorite = ?
+            cook_time = ?, servings = ?, difficulty = ?, favorite = ?, category_id = ?
         WHERE ID = ?    
     `);
 
@@ -341,14 +349,22 @@ app.put('/api/recipes/:id', (req, res) => {
         servings !== undefined ? servings : recipe.servings, 
         difficulty !== undefined ? difficulty : recipe.difficulty, 
         favorite !== undefined ? favorite : recipe.favorite,
+        category_id !== undefined ? category_id : recipe.category_id,
         id
     );
 
-    const updateRecipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(id);
+    const updatedRecipe = db.prepare(`
+        SELECT recipes.*, users.username as author,
+            categories.name AS category_name
+        FROM recipes 
+        JOIN users ON recipes.user_id = users.id
+        JOIN categories ON recipes.category_id = categories_id
+        WHERE recipes.id = ?
+    `).get(id);
 
     res.json({
         message: "Recipe updated successfully",
-        recipe: updateRecipe
+        recipe: updatedRecipe
     });
 });
 
@@ -375,7 +391,7 @@ app.patch('/api/recipes/:id/toggle', (req, res) => {
     });
 });
 
-app.delete('/api/recipes/:id',(req, res) => {
+app.delete('/api/recipes/:id', authenticateToken, (req, res) => {
     const id = parseInt(req.params.id);
     const recipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(id);
 
@@ -383,6 +399,15 @@ app.delete('/api/recipes/:id',(req, res) => {
         return res.status(404).json({
             error: "Recipe not found",
             id: id
+        });
+    }
+
+    // Check ownership
+    if (recipe.user_id !== req.user.userId) {
+        return  res.status(403).json({
+            error: "Forbidden: You can only delete your own recipes",
+            recipe_owner: recipe.user_id,
+            your_user_id: req.user.userId
         });
     }
 
