@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Young+Serif&display=swap" rel="stylesheet">
+  <title>Frontend Mentor | Recipe page</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+  <body>
+    <main class="main">
+      <img class="omelette" src="./image-omelette.jpeg" alt="Omelette">
+
+      <h1 class="title" id="recipeTitle">Loading...</h1>
+
+      <p>
+        An easy and quick dish, perfect for any meal. This classic omelette combines beaten eggs cooked 
+        to perfection, optionally filled with your choice of cheese, vegetables, or meats.
+      </p>
+
+      <section class="prep-time">
+        <h2 class="prep-time-title">Preparation time</h2>
+
+        <ul>
+          <li><span class="bullet-space"><strong>Total</strong>: Approximately 10 minutes</span></li>
+          <li><span class="bullet-space"><strong>Preparation</strong>: 5 minutes</span></li>
+          <li><span class="bullet-space"><strong>Cooking</strong>: 5 minutes</span></li>
+        </ul>
+      </section>
+
+      <h2 class="sub-heading">Ingredients</h2>
+
+      <ul>
+        <li><span class="bullet-space">2-3 large eggs</span></li>
+        <li><span class="bullet-space">Salt, to taste</span></li>
+        <li><span class="bullet-space">Pepper, to taste</span></li>
+        <li><span class="bullet-space">1 tablespoon of butter or oil</span></li>
+        <li><span class="bullet-space">Optional fillings: cheese, diced vegetables, cooked meats, herbs</span></li>
+      </ul>
+
+      <div class="hr"></div>
+
+      <h2 class="sub-heading">Instructions</h2>
+
+      <ol>
+        <li>
+          <strong>Beat the eggs</strong>: In a bowl, beat the eggs with a pinch of salt and pepper until they are well mixed. 
+          You can add a tablespoon of water or milk for a fluffier texture.
+        </li>
+
+        <li>
+          <strong>Heat the pan</strong>: Place a non-stick frying pan over medium heat and add butter or oil.
+        </li>
+
+        <li>
+          <strong>Cook the omelette</strong>: Once the butter is melted and bubbling, pour in the eggs. Tilt the pan to ensure 
+          the eggs evenly coat the surface.
+        </li>
+
+        <li>
+          <strong>Add fillings (optional)</strong>: When the eggs begin to set at the edges but are still slightly runny in the 
+          middle, sprinkle your chosen fillings over one half of the omelette.
+        </li>
+
+        <li>
+          <strong>Fold and serve</strong>: As the omelette continues to cook, carefully lift one edge and fold it over the 
+          fillings. Let it cook for another minute, then slide it onto a plate.
+        </li>
+
+        <li>
+          <strong>Enjoy</strong>: Serve hot, with additional salt and pepper if needed.
+        </li>
+
+      </ol>
+
+      <div class="hr"></div>
+
+      <h2 class="sub-heading">Nutrition</h2>
+
+      <p>The table below shows nutritional values per serving without the additional fillings.</p>
+
+      <table>
+        <tr>
+          <td class="nutrient">Calories</td>
+          <td class="nutrient-value">277kcal</td>
+        </tr>
+        <tr class="divider-row"><td colspan="2"></td></tr>
+        <tr>
+          <td class="nutrient">Carbs</td>
+          <td class="nutrient-value">0g</td>
+        </tr>
+        <tr class="divider-row"><td colspan="2"></td></tr>
+        <tr>
+          <td class="nutrient">Protein</td>
+          <td class="nutrient-value">20g</td>
+        </tr>
+        <tr class="divider-row"><td colspan="2"></td></tr>
+        <tr>
+          <td class="nutrient">Fat</td>
+          <td class="nutrient-value">22g</td>
+        </tr>
+      </table>
+      
+      <!-- <div class="attribution">
+        Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+        Coded by <a href="#">Your Name Here</a>.
+      </div> -->
+    </main>
+    <script>
+        const API_URL = 'http://localhost:3000'
+
+        // Get the recipe ID from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const recipeId = urlParams.get('id');
+
+        console.log("Recipe ID:", recipeId);
+        console.log("Full URL:", window.location.search);
+
+        // Fetch the recipe
+        async function loadRecipe() {
+            try {
+                const response = await fetch(`${API_URL}/api/recipes/${recipeId}`);
+                const recipe = await response.json();
+
+                console.log("Got recipe:", recipe);
+            } catch (error) {
+                console.log("Error:", error);
+            }
+        }
+
+        // Run it!
+        loadRecipe();
+    </script>
+  </body>
+</html>

@@ -7,6 +7,24 @@ const jwt = require('jsonwebtoken');
 const app = express();
 app.use(express.json());
 
+// 🌐 CORS - Allow frontend to connect!
+app.use((req, res, next) => {
+    // Line 1: "I allow requests from ANY origin"
+    res.header('Access-Control-Allow-Origin', '*'); // In production instead of '*' write the site's address: e.g. 'https://myrecipeapp.com'
+    // Line 2: "I allow these HTTP methods"
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    // Line 3: "I allow these headers in requests"
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // Line 4-6: Handle "preflight" checks (browser's security check)
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+
+    // Line 7: Continue to next middleware/route
+    next();
+});
+
 const JWT_SECRET = process.env.JWT_SECRET;
 console.log('JWT_SECRET:', JWT_SECRET ? 'Loaded ✅' : 'NOT LOADED ❌');
 
