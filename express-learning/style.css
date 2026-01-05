@@ -43,6 +43,14 @@ body {
     font-weight: 600;
 }
 
+.description {
+    background-color: blanchedalmond;
+    color: peru;
+    border-radius: 5px;
+    padding: 3px 6px;
+    display:inline;
+}
+
 .prep-time {
     background-color: hsl(330, 100%, 98%);
     border-radius: .4rem;
@@ -68,11 +76,12 @@ body {
     margin: .4rem;
 }
 
-p {
+p, a {
     line-height: 1.1rem;
+    text-decoration: none;
 }
 
-p, li, .nutrient {
+p, li, a, .nutrient {
     color: hsl(30, 10%, 34%);
     font-size: .7rem;
     list-style-position: inside;
@@ -118,6 +127,46 @@ td:nth-child(even) {
 
 .nutrient-value {
     font-size: .6rem;
+}
+
+#ownerActions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* .hidden {
+    display: none !important;
+} */
+
+.btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 0.4rem;
+    font-family: "Outfit", sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-edit {
+    background-color: hsl(14, 45%, 36%);
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: hsl(14, 45%, 30%);
+}
+
+.btn-delete {
+    background-color: hsl(0, 70%, 50%);
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: hsl(0, 70%, 40%);
 }
 
 @media (width <= 557px) {

@@ -16,71 +16,38 @@
 
       <h1 class="title" id="recipeTitle">Loading...</h1>
 
-      <p>
-        An easy and quick dish, perfect for any meal. This classic omelette combines beaten eggs cooked 
-        to perfection, optionally filled with your choice of cheese, vegetables, or meats.
-      </p>
+      <a href="user-recipes.html?userId=${recipe.user_id}" class="recipe-author" id="recipeAuthor">Loading...</a>
+
+      <p class="description" id="descriptionText">Loading...</p>
 
       <section class="prep-time">
         <h2 class="prep-time-title">Preparation time</h2>
 
         <ul>
-          <li><span class="bullet-space"><strong>Total</strong>: Approximately 10 minutes</span></li>
-          <li><span class="bullet-space"><strong>Preparation</strong>: 5 minutes</span></li>
-          <li><span class="bullet-space"><strong>Cooking</strong>: 5 minutes</span></li>
+          <li><span class="bullet-space" id="totalTime">Loading...</span></li>
+          <li><span class="bullet-space" id="prepTime">Loading...</span></li>
+          <li><span class="bullet-space" id="cookTime">Loading...</span></li>
+          <li><span class="bullet-space" id="servings">Loading...</span></li>
         </ul>
       </section>
 
       <h2 class="sub-heading">Ingredients</h2>
 
-      <ul>
-        <li><span class="bullet-space">2-3 large eggs</span></li>
-        <li><span class="bullet-space">Salt, to taste</span></li>
-        <li><span class="bullet-space">Pepper, to taste</span></li>
-        <li><span class="bullet-space">1 tablespoon of butter or oil</span></li>
-        <li><span class="bullet-space">Optional fillings: cheese, diced vegetables, cooked meats, herbs</span></li>
-      </ul>
+      <ul id="ingredientsList"></ul>
 
       <div class="hr"></div>
 
       <h2 class="sub-heading">Instructions</h2>
 
-      <ol>
-        <li>
-          <strong>Beat the eggs</strong>: In a bowl, beat the eggs with a pinch of salt and pepper until they are well mixed. 
-          You can add a tablespoon of water or milk for a fluffier texture.
-        </li>
-
-        <li>
-          <strong>Heat the pan</strong>: Place a non-stick frying pan over medium heat and add butter or oil.
-        </li>
-
-        <li>
-          <strong>Cook the omelette</strong>: Once the butter is melted and bubbling, pour in the eggs. Tilt the pan to ensure 
-          the eggs evenly coat the surface.
-        </li>
-
-        <li>
-          <strong>Add fillings (optional)</strong>: When the eggs begin to set at the edges but are still slightly runny in the 
-          middle, sprinkle your chosen fillings over one half of the omelette.
-        </li>
-
-        <li>
-          <strong>Fold and serve</strong>: As the omelette continues to cook, carefully lift one edge and fold it over the 
-          fillings. Let it cook for another minute, then slide it onto a plate.
-        </li>
-
-        <li>
-          <strong>Enjoy</strong>: Serve hot, with additional salt and pepper if needed.
-        </li>
-
-      </ol>
+      <ol id="instructionsList"></ol>
 
       <div class="hr"></div>
 
       <h2 class="sub-heading">Nutrition</h2>
 
-      <p>The table below shows nutritional values per serving without the additional fillings.</p>
+      <p>The table below shows nutritional values per 
+        serving without the additional fillings.
+      </p>
 
       <table>
         <tr>
@@ -103,6 +70,11 @@
           <td class="nutrient-value">22g</td>
         </tr>
       </table>
+
+      <div id="ownerActions" class="hidden">
+        <button id="editBtn" class="btn btn-edit">Edit Recipe</button>
+        <button id="deleteBtn" class="btn btn-delete">Delete Recipe</button>
+      </div>
       
       <!-- <div class="attribution">
         Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
@@ -124,10 +96,40 @@
             try {
                 const response = await fetch(`${API_URL}/api/recipes/${recipeId}`);
                 const recipe = await response.json();
-
                 console.log("Got recipe:", recipe);
+
+                // Update title
+                document.getElementById('recipeTitle').textContent = recipe.title || 'Untitled Recipe';
+
+                document.getElementById('recipeAuthor').textContent = 
+                  recipe.author ? `By ${recipe.author}` : 'By Unknown Author';
+
+                document.getElementById('descriptionText').textContent = recipe.category_name;
+
+                // Update quantities
+                document.getElementById('totalTime').innerHTML = `<strong>Total</strong>: Approximately ${recipe.prep_time + recipe.cook_time} minutes`;
+                document.getElementById('prepTime').innerHTML = `<strong>Preparation</strong>: ${recipe.prep_time} minutes`;
+                document.getElementById('cookTime').innerHTML = `<strong>Cooking</strong>: ${recipe.cook_time} minutes`;
+                document.getElementById('servings').innerHTML = `<strong>Servings</strong>: ${recipe.servings}`;
+                
+                // Update Ingredients
+                const ingredientsArray = recipe.ingredients.split(', ');
+                const ingredientsHTML = ingredientsArray
+                  .map(ingredient => `<li><span class="bullet-space">${ingredient}</span></li>`)
+                  .join('');
+
+                document.getElementById('ingredientsList').innerHTML = ingredientsHTML;
+
+                // Update Instructions
+                const instructionsArray = recipe.instructions.split(', ');
+                const instructionsHTML = instructionsArray
+                  .map(instruction => `<li>${instruction}</li>`)
+                  .join('');
+
+                  document.getElementById('instructionsList').innerHTML = instructionsHTML;
             } catch (error) {
                 console.log("Error:", error);
+                document.getElementById('recipeTitle').textContent = "Error loading recipe";
             }
         }
 
@@ -136,3 +138,24 @@
     </script>
   </body>
 </html>
+
+
+<!-- // Update Ingredients
+const ingredientsArray = recipe.ingredients.split(', ');
+
+let ingredientsHTML = '';
+ingredientsArray.forEach(ingredient => {
+  ingredientsHTML += `<li><span class="bullet-space">${ingredient}</span></li>`;
+});
+
+document.getElementById('ingredientsList').innerHTML = ingredientsHTML; -->
+
+
+<!-- const token = localStorage.getItem('token');
+if (token) {
+    // User is logged in!
+} -->
+
+<!-- if (recipe.user_id === currentUser.id) {
+    // This user owns this recipe!
+} -->
