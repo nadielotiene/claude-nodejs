@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <title>My Recipe Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .search-input {
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 20px; 
+            font-size: 16px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px;
+        }
+
+        .difficulty-div {
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        .filter-btn.active {
+            background-color: #333;
+            color: white;
+            border-color: #333;
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .recipe-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .recipe-meta {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🔍 My Recipe Collection</h1>
+
+        <input class="search-input"
+            type="text" 
+            id="searchInput" 
+            placeholder="Search recipes by title, ingredients, or author..." 
+        >
+
+        <div class="difficulty-div">
+            <!-- data-* attributes let you store custom data on HTML elements! -->
+            <!-- e.g. button.dataset.filter -->
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="easy">Easy</button>
+            <button class="filter-btn" data-filter="medium">Medium</button>
+            <button class="filter-btn" data-filter="hard">Hard</button>
+        </div>
+
+        <div class="loading" id="loading">Loading recipes...</div>
+        <div class="recipe-grid" id="recipeGrid"></div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3000';
+        
+        let allRecipes = [];
+        
+        async function fetchRecipes() {
+            try {
+                const response = await fetch(`${API_URL}/api/recipes`);
+                const data = await response.json();
+                
+                allRecipes = data.recipes;
+                displayRecipes(allRecipes);
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('loading').textContent = "Error loading collection";
+            }
+        }
+        
+        function displayRecipes(recipes) {
+            document.getElementById('loading').style.display = 'none';
+            
+            const grid = document.getElementById('recipeGrid');
+            
+            grid.innerHTML = recipes.map(recipe => `
+            <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
+                <h3 class="recipe-title">${recipe.title}</h3>
+                <p class="recipe-meta">By ${recipe.author}</p>
+                <p class="recipe-meta">Prep ${recipe.prep_time}min | Cook ${recipe.cook_time}min</p>
+                </div>
+                `).join('');
+        }
+        function viewRecipe(id) {
+            window.location.href = `recipe-detail.html?id=${id}`;
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            // 1. Get what the user typed
+            const searchTerm = e.target.value.toLowerCase();
+
+            // 2. Filter the recipes
+            const filtered = allRecipes.filter(recipe => {
+                return recipe.title.toLowerCase().includes(searchTerm) ||
+                       recipe.ingredients.toLowerCase().includes(searchTerm) ||
+                       recipe.author.toLowerCase().includes(searchTerm);
+            });
+
+            displayRecipes(filtered);
+        });
+
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', () => {
+
+                // Remove active class from all buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Add active class to clicked button
+                button.classList.add('active');
+
+                // Get filter value (from data-filter on the HTML)
+                const filterValue = button.dataset.filter;
+
+                // Filter recipes
+                let filtered;
+                if (filterValue === 'all') {
+                    filtered = allRecipes;
+                } else {
+                    filtered = allRecipes.filter(
+                        recipe => recipe.difficulty === filterValue
+                    );
+                }
+
+                // Display
+                displayRecipes(filtered);
+            });
+        });
+            
+        fetchRecipes();
+    </script>
+</body>
+</html>

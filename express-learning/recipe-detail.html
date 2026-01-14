@@ -16,7 +16,7 @@
 
       <h1 class="title" id="recipeTitle">Loading...</h1>
 
-      <a href="user-recipes.html?userId=${recipe.user_id}" class="recipe-author" id="recipeAuthor">Loading...</a>
+      <p class="recipe-author" id="recipeAuthor">Loading...</p>
 
       <p class="description" id="descriptionText">Loading...</p>
 
@@ -88,9 +88,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const recipeId = urlParams.get('id');
 
-        console.log("Recipe ID:", recipeId);
-        console.log("Full URL:", window.location.search);
-
         // Fetch the recipe
         async function loadRecipe() {
             try {
@@ -100,10 +97,8 @@
 
                 // Update title
                 document.getElementById('recipeTitle').textContent = recipe.title || 'Untitled Recipe';
-
                 document.getElementById('recipeAuthor').textContent = 
                   recipe.author ? `By ${recipe.author}` : 'By Unknown Author';
-
                 document.getElementById('descriptionText').textContent = recipe.category_name;
 
                 // Update quantities
@@ -125,37 +120,95 @@
                 const instructionsHTML = instructionsArray
                   .map(instruction => `<li>${instruction}</li>`)
                   .join('');
+                document.getElementById('instructionsList').innerHTML = instructionsHTML;
+                  
+                // Check if user owns this recipe
+                checkOwnership(recipe);
 
-                  document.getElementById('instructionsList').innerHTML = instructionsHTML;
             } catch (error) {
                 console.log("Error:", error);
                 document.getElementById('recipeTitle').textContent = "Error loading recipe";
+
             }
         }
+
+        // Check Ownership of the recipe
+        function checkOwnership(recipe) {
+
+          console.log('🔍 Checking ownership for recipe:', recipe);
+
+          // GET token and user from localStorage
+          const token = localStorage.getItem('token');
+          const userJson = localStorage.getItem('user');
+
+          console.log('🔑 Token exists:', !!token);
+          console.log('👤 User exists:', !!userJson);
+          
+          // Check if user is logged in
+          if (!token || !userJson) {
+            console.log('❌ Not logged in - hiding buttons');
+            // Not logged in - buttons stay hidden
+            return;
+          }
+          
+          // Parse the user JSON
+          const currentUser = JSON.parse(userJson);
+
+          console.log('👤 Current user:', currentUser);
+          console.log('🍳 Recipe owner:', recipe.user_id);
+          
+          // Check if this user owns the recipe
+          if (recipe.user_id === currentUser.id) {
+
+            console.log('✅ User owns recipe - showing buttons!');
+
+            // Show the buttons!
+            document.getElementById('ownerActions').classList.remove('hidden');
+          } else {
+              console.log('❌ User does NOT own recipe');
+          }
+        }
+          
+          // DELETE functionality
+          document.getElementById('deleteBtn').addEventListener('click', async () => {
+            // Ask for confirmation
+            const confirmed = confirm('Are you sure you want to delete this recipe?');
+            
+            if (!confirmed) {
+              return; // User clicked cancel
+            }
+            
+            // GET the token
+            const token = localStorage.getItem('token');
+            
+            try {
+              // Make DELETE request to API
+              const response = await fetch(`${API_URL}/api/recipes/${recipeId}`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+              
+              if (response.ok) {
+                alert('Recipe deleted successfully!');
+                // Redirect back to list page (of home for now)
+                window.location.href = 'recipe-list.html'; // Or wherever you want
+              } else {
+                const error = await response.json();
+                alert(`Failed to delete ${error.error}`);
+              }
+            } catch (error) {
+              console.error('Delete error:', error);
+              alert('Error deleting recipe');
+            }
+          });
+          
+          console.log("Recipe ID:", recipeId);
+          console.log("Full URL:", window.location.search);
 
         // Run it!
         loadRecipe();
     </script>
   </body>
 </html>
-
-
-<!-- // Update Ingredients
-const ingredientsArray = recipe.ingredients.split(', ');
-
-let ingredientsHTML = '';
-ingredientsArray.forEach(ingredient => {
-  ingredientsHTML += `<li><span class="bullet-space">${ingredient}</span></li>`;
-});
-
-document.getElementById('ingredientsList').innerHTML = ingredientsHTML; -->
-
-
-<!-- const token = localStorage.getItem('token');
-if (token) {
-    // User is logged in!
-} -->
-
-<!-- if (recipe.user_id === currentUser.id) {
-    // This user owns this recipe!
-} -->
