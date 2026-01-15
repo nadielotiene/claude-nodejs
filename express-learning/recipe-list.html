@@ -23,10 +23,26 @@
             margin: 0 auto;
         }
 
-        h1 {
+        .header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap; 
+            gap: 15px;
+        }
+
+        .title {
             text-align: center;
+            margin: 0;
             margin-bottom: 30px;
             color: #333;
+        }
+
+        #headerButtons {
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
         }
 
         .search-input {
@@ -103,11 +119,56 @@
             padding: 40px;
             font-size: 1.2rem;
         }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: #333;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #555;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: #333;
+            border: 2px solid #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f0f0f0;
+        }
+
+        .username-display {
+            color: #666;
+            font-weight: 600;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="title">🔍 My Recipe Collection</h1>
+        <!-- Header with title and user info -->
+        <div class="header">
+            <h1 class="title">🔍 My Recipe Collection</h1>
+
+            <div id="headerButtons">
+
+            </div>
+        </div>
+
 
         <input class="search-input"
             type="text" 

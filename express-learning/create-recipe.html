@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <title>Create Recipe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #333;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #555;
+        }
+
+        .btn-secondary {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background-color: #ccc;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .error-message {
+            background-color: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🍳 Create New Recipe</h1>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Title -->
+        <form id="recipeForm">
+            <div class="form-group">
+                <label for="title">Recipe Title *</label>
+                <input type="text" id="title" required>
+            </div>
+            
+            <!-- Ingredients -->
+            <div class="form-group">
+                <label for="ingredients">Ingredients * (separate with commas)</label>
+                <textarea id="ingredients" placeholder="water, rice, oil, salt" required></textarea>
+            </div>
+
+            <!-- Instructions -->
+            <div class="form-group">
+                <label for="instructions">Instructions * (separate with commas)</label>
+                <textarea id="instructions" placeholder="add ingredients cook, serve" required></textarea>
+            </div>
+
+            <!-- Prep & Cook Time -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="prepTime">Prep Time (minutes) *</label>
+                    <input type="number" id="prepTime" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="cookTime">Cook Time (minutes) *</label>
+                    <input type="number" id="cookTime" min="0" required>
+                </div>
+            </div>
+
+            <!-- Servings & Difficulty -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="servings">Servings *</label>
+                    <input type="number" id="servings" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="difficulty">Difficulty *</label>
+                    <select id="difficulty" required>
+                        <option value="">Select difficulty</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" required>
+                    <option value="">Select category</option>
+                    <option value="1">Breakfast</option>
+                    <option value="2">Lunch</option>
+                    <option value="3">Dinner</option>
+                    <option value="4">Dessert</option>
+                    <option value="5">Snacks</option>
+                </select>
+            </div>
+
+            <!-- Favorite -->
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="favorite">
+                    <label for="favorite">Mark as favorite</label>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">Create Recipe</button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='recipe-list.html'">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        const form = document.getElementById('recipeForm');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Collect all form data
+            const title = document.getElementById('title').value;
+            const ingredients = document.getElementById('ingredients').value;
+            const instructions = document.getElementById('instructions').value;
+            const prepTime = parseInt(document.getElementById('prepTime').value);
+            const cookTime = parseInt(document.getElementById('cookTime').value);
+            const servings = parseInt(document.getElementById('servings').value);
+            const difficulty = document.getElementById('difficulty').value;
+            const categoryId = parseInt(document.getElementById('category').value);
+            const favorite = document.getElementById('favorite').checked;
+
+            console.log('Form data:', { 
+                title, ingredients, instructions, prepTime, 
+                cookTime, servings, difficulty, categoryId, favorite
+             });
+
+            //  Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            // Check if user is logged in
+            if (!token) {
+                alert('You must be logged in to create a recipe!');
+                window.location.href = 'recipe-list.html';
+                return;
+            }
+
+            const recipeData = {
+                title: title,
+                ingredients: ingredients,
+                instructions: instructions,
+                prep_time: prepTime,
+                cook_time: cookTime,
+                servings: servings,
+                difficulty: difficulty,
+                category_id: categoryId,
+                favorite: favorite
+            }
+
+            console.log('📤 Sending to API:', recipeData);
+
+            try {
+                // Send POST request to API
+                const response = await fetch(`${API_URL}/api/recipes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(recipeData)
+                });
+
+                const data = await response.json();
+
+                console.log('API Response:', data);
+                console.log('Response status:', response.status);
+                
+                
+                if (response.ok) {
+                    // Success!
+                    alert('Recipe created successfully!');
+                    window.location.href = 'recipe-list.html';
+                } else {
+                    // Error from API
+                    console.log('Required fields:', data.required); 
+                    document.getElementById('errorMessage').textContent = data.error || 'Failed to create recipe';
+                    document.getElementById('errorMessage').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                    document.getElementById('errorMessage').textContent = data.error || 'Connection error. Make sure API is running!';
+                    document.getElementById('errorMessage').classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
