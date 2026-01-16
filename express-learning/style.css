@@ -24,6 +24,79 @@ body {
     padding: 1.8rem 2rem;
 }
 
+/* Navigation Styles - Add this to ALL pages */
+.nav {
+    background-color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.nav-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: #333;
+    cursor: pointer;
+}
+
+.nav-logo:hover {
+    color: #555;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.nav-btn-primary {
+    background-color: #333;
+    color: white;
+}
+
+.nav-btn-primary:hover {
+    background-color: #555;
+}
+
+.nav-btn-secondary {
+    background-color: white;
+    color: #333;
+    border: 2px solid #ddd;
+}
+
+.nav-btn-secondary:hover {
+    background-color: #f0f0f0;
+}
+
+.nav-username {
+    color: #666;
+    font-weight: 600;
+    font-size: 14px;
+}
+
 .omelette {
     width: 28rem;
     border-radius: .5rem;
