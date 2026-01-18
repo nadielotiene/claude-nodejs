@@ -366,7 +366,7 @@ app.put('/api/recipes/:id', authenticateToken, (req, res) => {
         cook_time !== undefined ? cook_time : recipe.cook_time, 
         servings !== undefined ? servings : recipe.servings, 
         difficulty !== undefined ? difficulty : recipe.difficulty, 
-        favorite !== undefined ? favorite : recipe.favorite,
+        favorite !== undefined ? (favorite ? 1 : 0) : recipe.favorite,
         category_id !== undefined ? category_id : recipe.category_id,
         id
     );
@@ -376,7 +376,7 @@ app.put('/api/recipes/:id', authenticateToken, (req, res) => {
             categories.name AS category_name
         FROM recipes 
         JOIN users ON recipes.user_id = users.id
-        JOIN categories ON recipes.category_id = categories_id
+        JOIN categories ON recipes.category_id = categories.id
         WHERE recipes.id = ?
     `).get(id);
 

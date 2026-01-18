@@ -212,6 +212,11 @@
               alert('Error deleting recipe');
             }
           });
+
+          // EDIT functionality
+          document.getElementById('editBtn').addEventListener('click', () => {
+            window.location.href = `edit-recipe.html?id=${recipeId}`;
+          });
           
           console.log("Recipe ID:", recipeId);
           console.log("Full URL:", window.location.search);
