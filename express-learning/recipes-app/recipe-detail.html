@@ -4,9 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Young+Serif&display=swap" rel="stylesheet">
   <title>Frontend Mentor | Recipe page</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -52,7 +49,7 @@
 
       <div class="hr"></div>
 
-      <h2 class="sub-heading">Nutrition</h2>
+      <!-- <h2 class="sub-heading">Nutrition</h2>
 
       <p>The table below shows nutritional values per 
         serving without the additional fillings.
@@ -78,7 +75,7 @@
           <td class="nutrient">Fat</td>
           <td class="nutrient-value">22g</td>
         </tr>
-      </table>
+      </table> -->
 
       <div id="ownerActions" class="hidden">
         <button id="editBtn" class="btn btn-edit">Edit Recipe</button>
@@ -244,7 +241,7 @@
           } else {
               // Step 6: If NOT logged in, show Login button
               navLinks.innerHTML = `
-                  <button class="nav-btn nav-btn-primary" onclick="alert('Login feature coming soon! For now, use the old list page.')">Login</button>
+                  <button class="nav-btn nav-btn-primary" onclick="window.location.href = 'login.html';">Login</button>
               `;
             }
         }
